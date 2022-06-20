@@ -65,7 +65,7 @@ async fn login(pool: web::Data<PostgresPool>, login_data: web::Json<LoginData>) 
     let logged_user = web::block(move || User::login(&conn, login_data.into_inner()))
         .await.unwrap()?;
 
-    match UserToken::generate_token(&logged_user.id, &logged_user.username) {
+    match UserToken::generate_token(&logged_user.id, &logged_user.email) {
         Ok(token) => {
             let json_data = json!({ "token": token, "token_type": "bearer" });
             Ok(web::Json(json_data))
@@ -76,7 +76,7 @@ async fn login(pool: web::Data<PostgresPool>, login_data: web::Json<LoginData>) 
 
 #[post("/api/refresh-token")]
 async fn refresh_token(user_token: UserToken) -> Result<impl Responder, UserError> {
-    match UserToken::generate_token(&user_token.id, &user_token.username) {
+    match UserToken::generate_token(&user_token.id, &user_token.email) {
         Ok(token) => {
             let json_data = json!({ "token": token, "token_type": "bearer" });
             Ok(web::Json(json_data))

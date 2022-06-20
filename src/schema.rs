@@ -1,8 +1,9 @@
 table! {
     user (id) {
         id -> Uuid,
-        username -> Text,
-        password -> Text,
+        email -> Varchar,
+        name -> Varchar,
+        password -> Varchar,
         created_at -> Timestamp,
     }
 }

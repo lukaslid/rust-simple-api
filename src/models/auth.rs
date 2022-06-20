@@ -8,13 +8,13 @@ use uuid::Uuid;
 
 
 pub struct AuthenticatedUser {
-    pub username: String,
+    pub email: String,
     pub id: Uuid,
 }
 
 impl From<UserToken> for AuthenticatedUser {
     fn from(token: UserToken) -> Self {
-        AuthenticatedUser { username: token.username, id: token.id }
+        AuthenticatedUser { email: token.email, id: token.id }
     }
 }
 

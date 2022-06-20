@@ -15,8 +15,8 @@ pub enum UserError {
     InvalidCredentials,
     #[display(fmt = "User does not exist.")]
     UserNotFoundError,
-    #[display(fmt = "Username {} is already taken.", username)]
-    UsernameAlreadyExistsError { username: String },
+    #[display(fmt = "Email {} is already taken.", email)]
+    EmailAlreadyExistsError { email: String },
     #[display(fmt = "{}", message)]
     ValidationError { message: String },
     #[display(fmt = "An internal error occurred. Please try again later.")]
@@ -26,7 +26,7 @@ pub enum UserError {
 impl error::ResponseError for UserError {
     fn status_code(&self) -> StatusCode {
         match *self {
-            UserError::UsernameAlreadyExistsError { .. } => StatusCode::BAD_REQUEST,
+            UserError::EmailAlreadyExistsError { .. } => StatusCode::BAD_REQUEST,
             UserError::ValidationError { .. } => StatusCode::BAD_REQUEST,
             UserError::InvalidCredentials => StatusCode::UNAUTHORIZED,
             UserError::Unauthorized => StatusCode::UNAUTHORIZED,

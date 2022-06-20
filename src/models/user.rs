@@ -13,7 +13,8 @@ use validator::Validate;
 #[table_name = "user"]
 pub struct User {
     pub id: Uuid,
-    pub username: String,
+    pub email: String,
+    pub name: String,
     #[serde(skip_serializing)]
     pub password: String,
     pub created_at: NaiveDateTime,
@@ -21,15 +22,17 @@ pub struct User {
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct NewUser{
+    #[validate(email)]
+    pub email: String,
     #[validate(length(min = 3, max = 20))]
-    pub username: String,
+    pub name: String,
     #[validate(length(min = 3, max = 20))]
     pub password: String
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct LoginData{
-    pub username: String,
+    pub email: String,
     pub password: String,
 }
 
@@ -66,14 +69,14 @@ impl User {
         {
             Ok(user) => Ok(user),
             Err(diesel::result::Error::DatabaseError(diesel::result::DatabaseErrorKind::UniqueViolation, _)) 
-                => Err(UserError::UsernameAlreadyExistsError { username: user.username }),
+                => Err(UserError::EmailAlreadyExistsError { email: user.email }),
             Err(_) => Err(UserError::InternalError)
         }
     }
 
     pub fn login(conn: &PgConnection, login_data: LoginData) -> Result<Self, UserError> {
         if let Ok(user_to_verify) = user::table
-            .filter(user::username.eq(&login_data.username))
+            .filter(user::email.eq(&login_data.email))
             .get_result::<User>(conn)
         {
             if user_to_verify.password.is_empty() {
@@ -114,7 +117,8 @@ impl From<NewUser> for User {
     fn from(user: NewUser) -> Self {
         User {
             id: Uuid::new_v4(),
-            username: user.username,
+            email: user.email,
+            name: user.name,
             password: user.password,
             created_at: Utc::now().naive_utc()
         }

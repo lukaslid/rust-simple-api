@@ -21,18 +21,18 @@ pub struct UserToken {
     // expiration
     pub exp: i64,
     // data
-    pub username: String,
+    pub email: String,
     pub id: Uuid
 }
 
 impl UserToken {
-    pub fn generate_token(user_id: &Uuid, username: &String) -> Result<String, UserError> {
+    pub fn generate_token(user_id: &Uuid, email: &String) -> Result<String, UserError> {
         let now = Utc::now().timestamp();
         let payload = UserToken {
             iat: now,
             exp: now + ONE_HOUR,
             id: user_id.clone(),
-            username: username.clone()
+            email: email.clone()
         };
 
         jsonwebtoken::encode(
