@@ -12,7 +12,7 @@ use crate::{errors::user::UserError};
 // TODO: load enocding and decoding keys once
 pub static KEY: [u8; 16] = *include_bytes!("../secret.key");
 
-static ONE_HOUR: i64 = 60 * 1; // in seconds
+static ONE_HOUR: i64 = 60 * 60; // in seconds
 
 #[derive(Serialize, Deserialize)]
 pub struct UserToken {
