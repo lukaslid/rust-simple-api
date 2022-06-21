@@ -6,7 +6,7 @@ Simple RESTful API created with rust, actix-web, Diesel, JWT.
 
 * Firstly generate a `secret.key` which will be used for JWT enocding/decoding. `head -c16 /dev/urandom > secret.key`
 * Run `cp .env.example .env` to create environmental variables file.
-* Create PostgreSQL database in pgAdmin, postgres cli or using diesel.
+* Create PostgreSQL database in pgAdmin, postgres cli or using diesel cli (if diesel cargo package installed run `diesel migration run`).
 * You can start use PostgreSQL via provided `docker-compose.yml` running `docker-compose up -d`
 * Build release: `cargo build --release`
 * Run release version (on linux): `target/release/rust-api`
@@ -28,5 +28,6 @@ Simple RESTful API created with rust, actix-web, Diesel, JWT.
 ### ToDo's
 * Add api as a service in `docker-compose.yml`.
 * Add Unit/Integration tests.
+* Embed migrations.
 * Tune inital dockerfile.
-* 
+* Pagination
