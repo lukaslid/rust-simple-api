@@ -1,17 +1,22 @@
-FROM rust:1.49-slim-buster
+FROM rust:latest AS builder
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN USER=root cargo new api
 WORKDIR /api
-
-COPY ./Cargo.lock ./Cargo.lock
-COPY ./Cargo.toml ./Cargo.toml
-
+COPY ./Cargo.lock Cargo.lock
+COPY ./Cargo.toml Cargo.toml
+COPY ./src src
 RUN cargo build --release
-RUN rm src/*.rs
-
-COPY ./src ./src
-
-RUN rm ./target/release/deps/api*
 RUN cargo install --path .
 
-CMD ["api"]
+FROM debian:buster-slim
+
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /api
+COPY --from=builder /api/target/release/api ./
+
+EXPOSE 8080
+CMD ["./api"]

@@ -4,13 +4,29 @@ services:
     container_name: users_api_db
     image: postgres:14.3-alpine
     restart: always
+    # passing credentials here for simplicity
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=admin
     ports:
-      - '5432:5432'
+      - 5432:5432
     volumes: 
       - db:/var/lib/postgresql/data
+  api:
+    container_name: users_api
+    image: users-api
+    restart: always
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; ./api'
+    tty: true
+    ports:
+    - 8080:8080
+    environment:
+    - HOST=0.0.0.0
+    - PORT=8080
+    - DATABASE_URL=postgres://postgres:admin@db/api_db
+    - RUST_LOG=rest_api=info,actix=info
+    depends_on:
+    - db
 volumes:
   db:
     driver: local
