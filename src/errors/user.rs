@@ -40,7 +40,7 @@ impl error::ResponseError for UserError {
             .insert_header(ContentType::json())
             .json(
                 json!({
-                    "errors": self.to_string()
+                    "error": self.to_string()
                 })
             )
     }
