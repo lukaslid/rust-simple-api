@@ -42,16 +42,14 @@ async fn create(pool: web::Data<PostgresPool>, new_user: web::Json<NewUser>) -> 
     let new_user = new_user.into_inner();
 
     match new_user.validate() {
-        Ok(_) => (),
-        Err(e) => return Err(UserError::from(e)),
-    };
-
-
-    let user = web::block(move || User::create(&conn, new_user))
-        .await
-        .unwrap()?;
-
-    Ok(web::Json(user))
+        Ok(_) => {
+            let user = web::block(move || User::create(&conn, new_user))
+                .await
+                .unwrap()?;
+            Ok(web::Json(user))
+        },
+        Err(e) => Err(UserError::from(e)),
+    }
 }
 
 
