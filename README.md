@@ -17,7 +17,7 @@ Simple RESTful API created with rust, actix-web, Diesel, JWT.
 * Firstly generate a `secret.key` which will be used for JWT enocding/decoding. `head -c16 /dev/urandom > src/secret.key`
 * Build docker image locally `docker build -t users-api .`
 * Edit environmental files in `docker-compose.yml` if needed.
-* Run `docker-compose up` to start the application. However, right now DB must be created before API service starts. Create database in pgAdmin, postgres cli or using diesel cli `diesel setup`. 
+* Run `docker-compose up` to start the application. However, right now DB must be created before API service starts. Create database in pgAdmin, postgres cli or using diesel cli `diesel setup`. To run this command `DATABASE_URL` must be stored in `.env`. Run `cp .env.example .env` to use the default parameters before running `diesel setup`.
 
 
 ### Routes
