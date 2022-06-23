@@ -69,7 +69,6 @@ impl UserToken {
     pub fn parse_jwt_from_request(request: &HttpRequest) -> Result<String, UserError> {
         if let Some(authen_header) = request.headers().get("Authorization") {
             if let Ok(auth_str) = authen_header.to_str() {
-                println!("header zz");
                 if !(auth_str.starts_with("bearer") || auth_str.starts_with("Bearer")) {
                     return Err(UserError::Unauthorized);
                 }
