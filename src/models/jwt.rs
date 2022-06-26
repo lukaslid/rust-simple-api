@@ -1,13 +1,13 @@
 use std::pin::Pin;
 
-use actix_web::{HttpRequest, FromRequest, dev::Payload};
+use actix_web::{dev::Payload, FromRequest, HttpRequest};
 use chrono::Utc;
 use futures_util::Future;
+use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use jsonwebtoken::{EncodingKey, Header, Validation, Algorithm, DecodingKey};
-use serde::{Serialize, Deserialize};
 
-use crate::{errors::user::UserError};
+use crate::errors::user::UserError;
 
 // TODO: load enocding and decoding keys once
 pub static KEY: [u8; 16] = *include_bytes!("../secret.key");
@@ -22,7 +22,7 @@ pub struct UserToken {
     pub exp: i64,
     // data
     pub email: String,
-    pub id: Uuid
+    pub id: Uuid,
 }
 
 impl UserToken {
@@ -32,7 +32,7 @@ impl UserToken {
             iat: now,
             exp: now + ONE_HOUR,
             id: user_id.clone(),
-            email: email.clone()
+            email: email.clone(),
         };
 
         jsonwebtoken::encode(
@@ -45,9 +45,9 @@ impl UserToken {
 
     pub fn decode_token(jwt: &String) -> Result<Self, UserError> {
         jsonwebtoken::decode::<UserToken>(
-            jwt, 
-            &DecodingKey::from_secret(&KEY), 
-            &Validation::new(Algorithm::HS256)
+            jwt,
+            &DecodingKey::from_secret(&KEY),
+            &Validation::new(Algorithm::HS256),
         )
         .and_then(|t| Ok(t.claims))
         .map_err(|_e| UserError::Unauthorized)
@@ -56,14 +56,10 @@ impl UserToken {
     pub fn verify_token(jwt: &String) -> Result<Self, UserError> {
         let mut validation = Validation::new(Algorithm::HS256);
         validation.validate_exp = false;
-        
-        jsonwebtoken::decode::<UserToken>(
-            jwt, 
-            &DecodingKey::from_secret(&KEY), 
-            &validation
-        )
-        .and_then(|t| Ok(t.claims))
-        .map_err(|_e| UserError::Unauthorized)
+
+        jsonwebtoken::decode::<UserToken>(jwt, &DecodingKey::from_secret(&KEY), &validation)
+            .and_then(|t| Ok(t.claims))
+            .map_err(|_e| UserError::Unauthorized)
     }
 
     pub fn parse_jwt_from_request(request: &HttpRequest) -> Result<String, UserError> {
@@ -72,43 +68,34 @@ impl UserToken {
                 if !(auth_str.starts_with("bearer") || auth_str.starts_with("Bearer")) {
                     return Err(UserError::Unauthorized);
                 }
-    
-                let bearer_token: Vec<&str> = auth_str
-                    .split_whitespace()
-                    .collect();
-    
+
+                let bearer_token: Vec<&str> = auth_str.split_whitespace().collect();
+
                 if bearer_token.len() != 2 {
                     return Err(UserError::Unauthorized);
                 }
-    
+
                 let token = bearer_token[1];
 
                 return Ok(token.to_owned());
             }
-        }   
+        }
         Err(UserError::Unauthorized)
     }
 }
-
 
 impl FromRequest for UserToken {
     type Error = UserError;
     type Future = Pin<Box<dyn Future<Output = Result<UserToken, Self::Error>>>>;
 
-    fn from_request(request: &HttpRequest, _pl: &mut Payload
-    ) -> Self::Future {
-
+    fn from_request(request: &HttpRequest, _pl: &mut Payload) -> Self::Future {
         if let Ok(jwt) = UserToken::parse_jwt_from_request(request) {
             if let Ok(user_token) = UserToken::verify_token(&jwt) {
                 println!("TOKEN {}", user_token.id);
-                return Box::pin(async move {
-                    Ok(user_token)
-                });
+                return Box::pin(async move { Ok(user_token) });
             }
         }
-        
-        Box::pin(async move {
-            Err(UserError::Unauthorized)
-        })
+
+        Box::pin(async move { Err(UserError::Unauthorized) })
     }
 }

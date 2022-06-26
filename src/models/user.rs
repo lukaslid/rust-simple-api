@@ -1,13 +1,12 @@
 use crate::errors::user::UserError;
 use crate::schema::user;
+use argon2::Config;
 use chrono::{NaiveDateTime, Utc};
-use diesel::{prelude::*};
+use diesel::prelude::*;
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use argon2::Config;
-use rand::Rng;
 use validator::Validate;
-
 
 #[derive(Serialize, Deserialize, Queryable, Insertable)]
 #[table_name = "user"]
@@ -21,41 +20,34 @@ pub struct User {
 }
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct NewUser{
+pub struct NewUser {
     #[validate(email)]
     pub email: String,
     #[validate(length(min = 3, max = 20))]
     pub name: String,
     #[validate(length(min = 3, max = 20))]
-    pub password: String
+    pub password: String,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct LoginData{
+pub struct LoginData {
     pub email: String,
     pub password: String,
 }
 
 impl User {
-
     pub fn get_all(conn: &PgConnection) -> Result<Vec<Self>, UserError> {
-        match user::table
-            .load::<User>(conn)
-        {
+        match user::table.load::<User>(conn) {
             Ok(users) => Ok(users),
-            Err(_) => Err(UserError::InternalError)
+            Err(_) => Err(UserError::InternalError),
         }
     }
 
     pub fn get(conn: &PgConnection, id: Uuid) -> Result<Self, UserError> {
-
-        match user::table
-            .filter(user::id.eq(id))
-            .first(conn) 
-        {
+        match user::table.filter(user::id.eq(id)).first(conn) {
             Ok(user) => Ok(user),
             Err(diesel::result::Error::NotFound) => Err(UserError::UserNotFoundError),
-            Err(_) => Err(UserError::InternalError)
+            Err(_) => Err(UserError::InternalError),
         }
     }
 
@@ -68,9 +60,11 @@ impl User {
             .get_result(conn)
         {
             Ok(user) => Ok(user),
-            Err(diesel::result::Error::DatabaseError(diesel::result::DatabaseErrorKind::UniqueViolation, _)) 
-                => Err(UserError::EmailAlreadyExistsError { email: user.email }),
-            Err(_) => Err(UserError::InternalError)
+            Err(diesel::result::Error::DatabaseError(
+                diesel::result::DatabaseErrorKind::UniqueViolation,
+                _,
+            )) => Err(UserError::EmailAlreadyExistsError { email: user.email }),
+            Err(_) => Err(UserError::InternalError),
         }
     }
 
@@ -91,25 +85,23 @@ impl User {
         Err(UserError::InvalidCredentials)
     }
 
-    
     pub fn hash_password(&mut self) -> Result<(), UserError> {
         let salt: [u8; 32] = rand::thread_rng().gen();
         let cfg = Config::default();
 
-        if let Ok(hashed_password) =  argon2::hash_encoded(self.password.as_bytes(), &salt, &cfg) {
+        if let Ok(hashed_password) = argon2::hash_encoded(self.password.as_bytes(), &salt, &cfg) {
             self.password = hashed_password;
             Ok(())
         } else {
             Err(UserError::InternalError)
         }
-    } 
+    }
 
     pub fn verify_password(&self, password: &[u8]) -> Result<bool, UserError> {
-        argon2::verify_encoded(&self.password, password)
-            .map_err(|_e|  {
-                println!("{}", _e);
-                UserError::InvalidCredentials
-            })
+        argon2::verify_encoded(&self.password, password).map_err(|_e| {
+            println!("{}", _e);
+            UserError::InvalidCredentials
+        })
     }
 }
 
@@ -120,7 +112,7 @@ impl From<NewUser> for User {
             email: user.email,
             name: user.name,
             password: user.password,
-            created_at: Utc::now().naive_utc()
+            created_at: Utc::now().naive_utc(),
         }
     }
 }

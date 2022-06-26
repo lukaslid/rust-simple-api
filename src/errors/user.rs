@@ -1,11 +1,12 @@
 use actix_web::{
     error,
-    http::{header::ContentType, StatusCode}, HttpResponse,
+    http::{header::ContentType, StatusCode},
+    HttpResponse,
 };
 use derive_more::{Display, Error};
 use serde::Serialize;
 use serde_json::json;
-use validator::{ValidationErrors};
+use validator::ValidationErrors;
 
 #[derive(Debug, Display, Error, Serialize)]
 pub enum UserError {
@@ -38,16 +39,16 @@ impl error::ResponseError for UserError {
     fn error_response(&self) -> HttpResponse {
         HttpResponse::build(self.status_code())
             .insert_header(ContentType::json())
-            .json(
-                json!({
-                    "error": self.to_string()
-                })
-            )
+            .json(json!({
+                "error": self.to_string()
+            }))
     }
 }
 
 impl From<ValidationErrors> for UserError {
     fn from(err: ValidationErrors) -> Self {
-        UserError::ValidationError { message: err.to_string()}
+        UserError::ValidationError {
+            message: err.to_string(),
+        }
     }
 }
