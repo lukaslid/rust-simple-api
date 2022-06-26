@@ -31,8 +31,12 @@ Simple RESTful API created with rust, actix-web, Diesel, JWT.
 |`/api/refresh-token`  | `POST` | `-` | Success returns new token: `{ "token": "ey...", "token_type": "bearer" }`. Failure - `401` | To refresh token a valid token is needed in Authorization header |
 
 
+### Testing
+* Create db with `diesel_cli`: `diesel setup --database-url='postgres://postgres:admin@localhost/test_api_db'`. Here I am using test DB url which is also in `.env` file.
+* Run `cargo test`
+
+
 
 ### ToDo's
-* Add Unit/Integration tests.
-* Embed migrations.
+* Add Unit/Integration tests. (Increase coverage)
 * Pagination

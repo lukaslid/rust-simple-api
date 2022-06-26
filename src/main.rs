@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate diesel;
+#[macro_use]
 extern crate diesel_migrations;
 
 mod api;
@@ -37,7 +38,7 @@ async fn main() -> std::io::Result<()> {
         .into()
     });
 
-    let db_pool = database::get_db_pool(&"DATABASE_URL".to_string());
+    let db_pool = database::init_database(&"DATABASE_URL".to_string());
 
     let server = HttpServer::new(move || {
         App::new()
