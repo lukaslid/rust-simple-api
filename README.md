@@ -1,4 +1,4 @@
-# rust-api
+# rust-simple-api
 Simple RESTful API created with rust, actix-web, Diesel, JWT.
 
 
@@ -10,7 +10,7 @@ Simple RESTful API created with rust, actix-web, Diesel, JWT.
 * Create PostgreSQL database in pgAdmin, postgres cli or using diesel cli (if diesel cargo package installed run `diesel setup`).
 * You can start use PostgreSQL via provided `docker-compose.yml` running `docker-compose up` or use a system service
 * Build release: `cargo build --release`
-* Run release version (on linux): `target/release/rust-api`
+* Run release version (on linux): `target/release/api`
 * Run debug version locally: `cargo run`
 
 #### Run with docker
