@@ -25,6 +25,18 @@ pub struct UserToken {
     pub id: Uuid,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct JWTResponse {
+    pub token: String,
+    pub token_type: String
+}
+
+impl JWTResponse {
+    pub fn new(token: String) -> Self {
+        Self {token, token_type: "bearer".to_string()}
+    }
+}
+
 impl UserToken {
     pub fn generate_token(user_id: &Uuid, email: &String) -> Result<String, UserError> {
         let now = Utc::now().timestamp();
