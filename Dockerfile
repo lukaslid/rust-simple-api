@@ -7,6 +7,7 @@ WORKDIR /api
 COPY ./Cargo.lock Cargo.lock
 COPY ./Cargo.toml Cargo.toml
 COPY ./src src
+COPY ./migrations migrations
 RUN cargo build --release
 RUN cargo install --path .
 
